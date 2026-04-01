@@ -1,4 +1,3 @@
-# CSES-solutions
 #include <bits/stdc++.h>
 #include <string>
  
@@ -564,95 +563,98 @@ public:
     }
 };
  
+vector<long long> dijkstra(int n, vector<vector<pair<int, int>>> &adj, int src)
+{
+    const long long INF = 1e18;
+    vector<long long> dist(n, INF);
+ 
+    priority_queue<
+        pair<long long, int>,
+        vector<pair<long long, int>>,
+        greater<pair<long long, int>>>
+        pq;
+ 
+    dist[src] = 0;
+    pq.push({0, src});
+ 
+    while (!pq.empty())
+    {
+        int d = pq.top().first;
+        int u = pq.top().second;
+        pq.pop();
+ 
+        if (d > dist[u])
+            continue;
+ 
+        for (auto it : adj[u])
+        {
+            int v = it.ff;
+            int w = it.ss;
+            if (dist[u] + w < dist[v])
+            {
+                dist[v] = dist[u] + w;
+                pq.push({dist[v], v});
+            }
+        }
+    }
+    return dist;
+}
+ 
 signed main()
 {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
+   
+    int n;
+    cin>>n;
  
-    int n, q;
-    cin >> n >> q;
-    vector<int> adj[n + 3];
-    for (int i = 2; i <= n; i++)
-    {
-        int x;
-        cin >> x;
-        int y;
-        cin >> y;
-        adj[x].push_back(y);
-        adj[y].pb(x);
+    vector<vector<int>> adj(n+1);
+    for(int i = 0 ; i < n-1 ; i++){
+      int x,y;
+      cin>>x>>y;
+      adj[x].pb(y);
+      adj[y].pb(x);
     }
  
-    vector<vector<int>> dp(n + 3, vector<int>(31, 0));
-    vector<int> level(n + 1, 0);
+    vector<vector<int>> dp(n+1 , vector<int>(2));
  
-    function<void(int, int, int)> dfs = [&](int node, int par, int x)
-    {
-        dp[node][0] = par;
-        level[node] = x;
-        for (int i = 1; i <= 30; i++)
+    function<void(int ,int)> dfs = [&](int node , int par){
+        int sum = 0;
+        dp[node][0] = 0;
+        dp[node][1] = 0;
+        for(auto i:adj[node])
         {
-            dp[node][i] = dp[dp[node][i - 1]][i - 1];
+            if(i == par) continue;
+            dfs(i , node);
+            sum += max(dp[i][0] , dp[i][1]);
         }
-        for (auto i : adj[node])
+        dp[node][0] = sum;
+ 
+        int res = 0;
+        for(auto i:adj[node])
         {
-            if (i == par)
-                continue;
-            dfs(i, node, x + 1);
+            if(i == par) continue;
+            int x = 1 + dp[i][0] + (sum - max(dp[i][0] , dp[i][1]));
+            res = max(res , x);
         }
-    };
-    dfs(1, 0, 0);
-    auto func = [&](int k, int node) -> int
-    {
-        for (int i = 30; i >= 0; i--)
-        {
-            if ((k >> i) & 1)
-                node = dp[node][i];
-        }
-        return node;
-    };
-    auto getLCA = [&](int a, int b) -> int
-    {
-        if (level[a] > level[b])
-            swap(a, b);
-        int k = level[b] - level[a];
-        b = func(k, b);
-        if (a == b)
-        {
-            return a;
-        }
-        for (int i = 30; i >= 0; i--)
-        {
-            if (dp[a][i] != dp[b][i])
-            {
-                a = dp[a][i];
-                b = dp[b][i];
-            }
-        }
-        return (dp[a][0] == 0 ? 1 : dp[a][0]);
+        dp[node][1] = res; 
+        
     };
  
-    vector<int> ans(n + 1, 0);
-    while (q--)
-    {
-        int a, b;
-        cin >> a >> b;
-        ans[a]++;
-        ans[b]++;
-        ans[getLCA(a, b)]--;
-        ans[dp[getLCA(a, b)][0]]--;
-    }
-    function<void(int, int)> dfs2 = [&](int node, int par)
-    {
-        for (auto i : adj[node])
-        {
-            if (i == par)
-                continue;
-            dfs2(i, node);
-            ans[node] += ans[i];
-        }
-    };
  
-    dfs2(1, -1);
-    for (int i = 1; i <= n; i++)
-        co ans[i] << " ";
+    dfs(1 , 0);
+    co max(dp[1][0] , dp[1][1]);
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 }

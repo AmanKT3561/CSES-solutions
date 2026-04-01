@@ -1,4 +1,3 @@
-# CSES-solutions
 #include <bits/stdc++.h>
 #include <string>
  
@@ -576,20 +575,15 @@ signed main()
     {
         int x;
         cin >> x;
-        int y;
-        cin >> y;
-        adj[x].push_back(y);
-        adj[y].pb(x);
+        adj[x].push_back(i);
     }
  
-    vector<vector<int>> dp(n + 3, vector<int>(31, 0));
-    vector<int> level(n + 1, 0);
+    vector<vector<int>> dp(n + 3, vector<int>(21, 0));
  
-    function<void(int, int, int)> dfs = [&](int node, int par, int x)
+    function<void(int, int)> dfs = [&](int node, int par)
     {
         dp[node][0] = par;
-        level[node] = x;
-        for (int i = 1; i <= 30; i++)
+        for (int i = 1; i <= 20; i++)
         {
             dp[node][i] = dp[dp[node][i - 1]][i - 1];
         }
@@ -597,62 +591,21 @@ signed main()
         {
             if (i == par)
                 continue;
-            dfs(i, node, x + 1);
+            dfs(i, node);
         }
     };
-    dfs(1, 0, 0);
-    auto func = [&](int k, int node) -> int
+    dfs(1, 0);
+    while (q--)
     {
-        for (int i = 30; i >= 0; i--)
+        int node, k;
+        cin >> node >> k;
+        for (int i = 19; i >= 0; i--)
         {
             if ((k >> i) & 1)
                 node = dp[node][i];
         }
-        return node;
-    };
-    auto getLCA = [&](int a, int b) -> int
-    {
-        if (level[a] > level[b])
-            swap(a, b);
-        int k = level[b] - level[a];
-        b = func(k, b);
-        if (a == b)
-        {
-            return a;
-        }
-        for (int i = 30; i >= 0; i--)
-        {
-            if (dp[a][i] != dp[b][i])
-            {
-                a = dp[a][i];
-                b = dp[b][i];
-            }
-        }
-        return (dp[a][0] == 0 ? 1 : dp[a][0]);
-    };
- 
-    vector<int> ans(n + 1, 0);
-    while (q--)
-    {
-        int a, b;
-        cin >> a >> b;
-        ans[a]++;
-        ans[b]++;
-        ans[getLCA(a, b)]--;
-        ans[dp[getLCA(a, b)][0]]--;
+        if (node == 0)
+            node = -1;
+        cout << node << endl;
     }
-    function<void(int, int)> dfs2 = [&](int node, int par)
-    {
-        for (auto i : adj[node])
-        {
-            if (i == par)
-                continue;
-            dfs2(i, node);
-            ans[node] += ans[i];
-        }
-    };
- 
-    dfs2(1, -1);
-    for (int i = 1; i <= n; i++)
-        co ans[i] << " ";
 }

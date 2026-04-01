@@ -1,4 +1,3 @@
-# CSES-solutions
 #include <bits/stdc++.h>
 #include <string>
  
@@ -655,4 +654,3 @@ signed main()
     dfs2(1, -1);
     for (int i = 1; i <= n; i++)
         co ans[i] << " ";
-}
